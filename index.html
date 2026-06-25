@@ -895,29 +895,61 @@ async function sincronizarAgora() {
   if (!SUPA_URL || !SUPA_KEY) { toast('Configure o Supabase primeiro'); return; }
   setSyncStatus('loading');
   try {
+    // ── LEADS ──
     const remotos = await supaFetch('leads?order=criado_em.desc');
-    // Merge: remote wins for existing, local-only pushed up
     const remoteMap = {};
     remotos.forEach(r => remoteMap[r.id] = r);
-    // Push leads not on remote
     const localOnly = leads.filter(l => !remoteMap[l.id]);
     for (const l of localOnly) {
       await supaFetch('leads', { method:'POST', body: JSON.stringify(leadToRow(l)) });
     }
-    // Fetch all again
-    const all = await supaFetch('leads?order=criado_em.desc');
-    leads = all.map(rowToLead);
+    const allLeads = await supaFetch('leads?order=criado_em.desc');
+    leads = allLeads.map(rowToLead);
+
+    // ── ORÇAMENTOS ──
+    try {
+      const remoteOrcs = await supaFetch('orcamentos?order=criado_em.desc');
+      const orcMap = {}; remoteOrcs.forEach(o => orcMap[o.id] = o);
+      const localOrcs = orcamentos.filter(o => !orcMap[o.id]);
+      for (const o of localOrcs) {
+        await supaFetch('orcamentos', { method:'POST', body: JSON.stringify(o) });
+      }
+      const allOrcs = await supaFetch('orcamentos?order=criado_em.desc');
+      orcamentos = allOrcs;
+    } catch(e2) { console.warn('orcamentos sync:', e2.message); }
+
+    // ── LAUDOS ──
+    try {
+      const remoteLaudos = await supaFetch('laudos?order=criado_em.desc');
+      const laudoMap = {}; remoteLaudos.forEach(l => laudoMap[l.id] = l);
+      const localLaudos = laudos.filter(l => !laudoMap[l.id]);
+      for (const l of localLaudos) {
+        await supaFetch('laudos', { method:'POST', body: JSON.stringify(l) });
+      }
+      const allLaudos = await supaFetch('laudos?order=criado_em.desc');
+      laudos = allLaudos;
+    } catch(e3) { console.warn('laudos sync:', e3.message); }
+
     saveLocal();
+    localStorage.setItem('dacanal_orcs',   JSON.stringify(orcamentos));
+    localStorage.setItem('dacanal_laudos', JSON.stringify(laudos));
+
+    // Render all
     renderKanban();
+    renderOrcamentos();
+    renderLaudos();
+    renderDash();
+
     supabaseOk = true;
     setSyncStatus('ok');
-    toast('Sincronizado com Supabase ✓');
+    toast('Sincronizado ✓');
   } catch(e) {
     setSyncStatus('err');
-    toast('Erro na sincronização: ' + e.message);
+    toast('Erro: ' + e.message);
   }
 }
 
+function sincronizarTudo() { return sincronizarAgora(); }
 function setSyncStatus(s) {
   const dot = document.getElementById('sync-dot');
   const txt = document.getElementById('sync-txt');
@@ -975,9 +1007,17 @@ function g(id) { return parseFloat(document.getElementById(id).value)||0; }
 function showTab(id, btn) {
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  if(btn) btn.classList.add('active');
-  else document.querySelector(`[onclick="showTab('${id}',this)"]`)?.classList.add('active');
+  const panel = document.getElementById('tab-'+id);
+  if (panel) panel.classList.add('active');
+  if (btn) btn.classList.add('active');
+  else {
+    const el = document.querySelector('[onclick*="showTab(\''+id+'\',this)"]');
+    if (el) el.classList.add('active');
+  }
+  // Render new tabs on switch
+  if (id === 'orcamentos') renderOrcamentos();
+  if (id === 'laudos')     renderLaudos();
+  if (id === 'dash')       renderDash();
 }
 
 // ══════════════════════════════════════════
@@ -1235,28 +1275,7 @@ function gerarPDF(){
   setTimeout(()=>window.print(),400);
 }
 
-async function salvarOrcamento(){
-  const d=window._d;if(!d){toast('Calcule primeiro');return;}
-  const ref=document.getElementById('orc-display').textContent;
-  const nome=document.getElementById('p-nome').value;
-  if(!nome){toast('Preencha o nome do cliente');return;}
-  // Find or create lead
-  const exist=leads.find(l=>l.nome.toLowerCase()===nome.toLowerCase());
-  if(exist){
-    exist.valor=d.preco.toFixed(2);
-    exist.estagio=exist.estagio==='prosp'?'prop':exist.estagio;
-    await save(exist);toast(`Orçamento ${ref} vinculado ao lead "${nome}"`);
-  } else {
-    const nl={id:uid(),nome,tipo:'Condomínio',cidade:document.getElementById('p-end').value||'',
-      resp:document.getElementById('p-resp').value,tel:'',email:'',estagio:'prop',
-      valor:d.preco.toFixed(2),equip:d.equip,followup:'',origem:'Direto',obs:`ORC: ${ref}`,
-      historico:[{id:uid(),tipo:'E-mail',texto:`Proposta ${ref} gerada · ${fmtD(d.preco)}`,data:new Date().toISOString()}],
-      criadoEm:new Date().toISOString()};
-    leads.unshift(nl);await save(nl);
-    toast(`Lead criado e orçamento ${ref} salvo!`);
-  }
-  renderKanban();
-}
+// salvarOrcamento: see updated version below
 
 function copiarResumo(){
   const d=window._d;const ref=document.getElementById('orc-display').textContent;
@@ -1574,20 +1593,7 @@ function renderDash() {
   if(fuEl)fuEl.innerHTML=urg.length?urg.map(l=>`<div style="background:var(--redbg);border:1px solid rgba(224,112,112,.3);border-radius:5px;padding:6px 9px;font-size:10px;display:flex;justify-content:space-between"><span style="color:var(--white);font-weight:600">${l.nome}</span><span style="color:var(--red)">${l.followup}</span></div>`).join(''):'<div style="font-size:10px;color:var(--textd);text-align:center;padding:9px">✅ Nenhum follow-up urgente</div>';
 }
 
-// Patch showTab to render new tabs
-const _origShowTab = showTab;
-function showTab(id, btn) {
-  _origShowTab(id, btn);
-  if(id==='orcamentos') renderOrcamentos();
-  if(id==='laudos') renderLaudos();
-  if(id==='dash') renderDash();
-}
-
-// Patch salvarOrcamento override
-// (already defined above, overrides the previous one)
-
-// Patch initOrcNum on load
-document.addEventListener('DOMContentLoaded', () => {});
+// showTab already handles new tabs above
 
 
 // ══════════════════════════════════════════
@@ -1663,14 +1669,21 @@ async function fazerLogin() {
 function entrarPortal() {
   document.getElementById('auth-overlay').classList.add('hidden');
   document.getElementById('nav-right-area').style.display = 'flex';
-  if (currentUser?.email) {
+  if (currentUser && currentUser.email) {
     document.getElementById('nav-user-email').textContent = currentUser.email;
   }
+  // Load extra data
+  orcamentos = JSON.parse(localStorage.getItem("dacanal_orcs") || "[]");
+  laudos     = JSON.parse(localStorage.getItem("dacanal_laudos") || "[]");
   // Start app
   carregarConfig();
   calcFicha();
   initOrcNum();
-  renderAll();
+  // Render all panels
+  renderKanban();
+  renderOrcamentos();
+  renderLaudos();
+  renderDash();
   if (SUPA_URL && SUPA_KEY) sincronizarTudo();
 }
 
@@ -1770,13 +1783,9 @@ async function supaFetch(path, opts={}) {
   }
 })();
 
-// (auth init handles startup)
-orcamentos=JSON.parse(localStorage.getItem("dacanal_orcs")||"[]");
-laudos=JSON.parse(localStorage.getItem("dacanal_laudos")||"[]");
-initOrcNum();
-renderOrcamentos();
-renderLaudos();
-renderDash();
+// Data loaded by entrarPortal()
+orcamentos = JSON.parse(localStorage.getItem("dacanal_orcs") || "[]");
+laudos     = JSON.parse(localStorage.getItem("dacanal_laudos") || "[]");
 </script>
 </body>
 </html>
