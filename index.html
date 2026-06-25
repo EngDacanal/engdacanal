@@ -1270,9 +1270,43 @@ function gerarPDF(){
     </div>
     <hr class="pdf-divider">
     <div class="pdf-footer"><div class="pdf-sign"><div class="sign-line"></div><strong>Flávio Dacanal Junior</strong><p>Engenheiro Mecânico · CREA-SP 5071835051 · CEA ANBIMA</p></div><div class="pdf-crea">Dacanal Engenharia · Ribeirão Preto / SP<br>CREA-SP 5071835051 · CEA ANBIMA<br>Laudo conforme ABNT NBR 16071<br>${ref}</div></div>`;
-  document.getElementById('sec-orcpdf').style.display='block';
-  document.getElementById('sec-orcpdf').scrollIntoView({behavior:'smooth'});
-  setTimeout(()=>window.print(),400);
+  // Render in print frame and print
+  const pdfHtml = document.getElementById('pdf-content').innerHTML;
+  const frame = document.getElementById('print-frame');
+  const printContent = document.getElementById('pdf-print-content');
+
+  // Copy styles needed for print
+  const styles = Array.from(document.styleSheets)
+    .map(s => { try { return Array.from(s.cssRules).map(r=>r.cssText).join(''); } catch(e){return '';} })
+    .join('');
+
+  // Open new window for clean print
+  const w = window.open('', '_blank', 'width=900,height=700');
+  w.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Proposta de Serviço — ${ref}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  @page{size:A4;margin:10mm 13mm 10mm 13mm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',Arial,sans-serif;background:#fff;color:#1a1a1a;font-size:13px}
+  @media print{body{padding:0}}
+  ${styles.replace(/<\/style>/g,'').replace(/<style[^>]*>/g,'')}
+</style>
+</head>
+<body>
+<div style="max-width:190mm;margin:0 auto;padding:8mm 0">
+${pdfHtml}
+</div>
+<script>
+  window.onload = function() {
+    setTimeout(function(){ window.print(); setTimeout(function(){ window.close(); },500); }, 400);
+  };
+<\/script>
+</body></html>`);
+  w.document.close();
 }
 
 // salvarOrcamento: see updated version below
