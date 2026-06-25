@@ -1759,20 +1759,20 @@ async function supaFetch(path, opts={}) {
 
 // ── INIT: check session on load ──
 (async function initAuth() {
-  // Load config first so SUPA_URL/KEY are available
-  SUPA_URL = localStorage.getItem('supa_url') || '';
-  SUPA_KEY = localStorage.getItem('supa_key') || '';
+  // Credenciais embutidas — funcionam em qualquer dispositivo sem configuração
+  const EMBEDDED_URL = 'https://pnaryykgrwigpxcmcmlt.supabase.co';
+  const EMBEDDED_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuYXJ5eWtncndpZ3B4Y21jbWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MTcyMzcsImV4cCI6MjA5Nzk5MzIzN30.8DwViCS1Omku_m0xv9QcoJ1Hn7__LTK9Gt3-nnugMFI';
+
+  // Use embedded if localStorage is empty
+  SUPA_URL = localStorage.getItem('supa_url') || EMBEDDED_URL;
+  SUPA_KEY = localStorage.getItem('supa_key') || EMBEDDED_KEY;
+
+  // Save to localStorage for other functions
+  if (!localStorage.getItem('supa_url')) localStorage.setItem('supa_url', EMBEDDED_URL);
+  if (!localStorage.getItem('supa_key')) localStorage.setItem('supa_key', EMBEDDED_KEY);
+
   if(document.getElementById('cfg-url')) document.getElementById('cfg-url').value = SUPA_URL;
   if(document.getElementById('cfg-key')) document.getElementById('cfg-key').value = SUPA_KEY;
-
-  if (!SUPA_URL || !SUPA_KEY) {
-    // No Supabase config — show config warning in login
-    const errEl = document.getElementById('auth-error');
-    errEl.textContent = '⚠️ Supabase não configurado. Configure na aba Config após entrar.';
-    // Allow access without auth if not configured yet (setup mode)
-    entrarPortal();
-    return;
-  }
 
   const valid = await verificarSessao();
   if (valid) {
