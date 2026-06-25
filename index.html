@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dacanal Engenharia — Sistema</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+:root {
+  --navy:#0c1824;--navy2:#111e2d;--navy3:#162438;--navy4:#1c2f46;--border:#1f3450;
+  --gold:#c9a84c;--golddim:#8a6e2e;--goldbg:rgba(201,168,76,.07);
+  --text:#b0c4d6;--textd:#6a8499;--white:#edf0f4;
+  --green:#4caf82;--greenbg:rgba(76,175,130,.12);
+  --red:#e07070;--redbg:rgba(224,112,112,.12);
+  --orange:#e0953a;--blue:#5b9bd5;--bluebg:rgba(91,155,213,.12);
+  --purple:#9b7fd4;--purplebg:rgba(155,127,212,.12);--r:9px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--navy);color:var(--text);font-size:13px}
+
+/* NAV */
+.topnav{background:var(--navy2);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:300}
+.nav-logo{font-family:'Playfair Display',serif;font-size:15px;color:var(--white);font-weight:700}
+.badge{background:var(--goldbg);border:1px solid var(--golddim);border-radius:5px;padding:3px 10px;font-size:10px;color:var(--gold);font-weight:600}
+.nav-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tab-bar{display:flex;background:var(--navy2);border-bottom:1px solid var(--border)}
+.tab-btn{padding:11px 22px;font-size:12px;font-weight:600;color:var(--textd);cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.btn{padding:8px 16px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--golddim));color:var(--navy)}
+.btn-gold:hover{filter:brightness(1.1)}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--textd)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-sm{padding:5px 11px;font-size:10px}
+.btn-danger{background:none;border:1px solid var(--border);color:var(--red)}
+.btn-danger:hover{border-color:var(--red);background:var(--redbg)}
+
+/* ── SETUP BANNER ── */
+.setup-banner{background:var(--redbg);border:1px solid rgba(224,112,112,.3);border-radius:9px;padding:14px 18px;margin:16px 20px;display:flex;align-items:flex-start;gap:12px}
+.setup-banner.ok{background:var(--greenbg);border-color:rgba(76,175,130,.3)}
+.setup-banner .sb-icon{font-size:20px;flex-shrink:0}
+.setup-banner .sb-text{font-size:12px;line-height:1.6}
+.setup-banner .sb-text strong{color:var(--white);display:block;margin-bottom:4px}
+.setup-banner input{background:var(--navy);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--white);outline:none;font-family:'Inter',sans-serif;margin-top:6px;width:100%}
+.setup-banner input:focus{border-color:var(--gold)}
+
+/* ── STATS BAR ── */
+.stats-bar{background:var(--navy2);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;gap:20px;overflow-x:auto}
+.stat{text-align:center;min-width:80px}
+.stat-val{font-size:18px;font-weight:700;color:var(--white)}
+.stat-val.gold{color:var(--gold)}.stat-val.green{color:var(--green)}
+.stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--textd);margin-top:2px}
+
+/* ── KANBAN ── */
+.filters{padding:10px 20px;display:flex;gap:8px;flex-wrap:wrap;background:var(--navy2);border-bottom:1px solid var(--border)}
+.filter-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);font-size:11px;cursor:pointer;background:var(--navy);color:var(--textd);transition:all .15s;user-select:none}
+.filter-chip.active{border-color:var(--gold);color:var(--gold);background:var(--goldbg)}
+.search-input{padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--navy);color:var(--white);font-size:12px;font-family:'Inter',sans-serif;outline:none;min-width:180px}
+.search-input:focus{border-color:var(--gold)}
+.search-input::placeholder{color:var(--textd)}
+.kanban{display:flex;gap:14px;padding:14px 20px;overflow-x:auto;min-height:calc(100vh - 260px);align-items:flex-start}
+.col{background:var(--navy2);border:1px solid var(--border);border-radius:var(--r);min-width:230px;width:230px;flex-shrink:0;display:flex;flex-direction:column;max-height:calc(100vh - 280px)}
+.col-head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.col-title{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.col-dot{width:7px;height:7px;border-radius:50%}
+.col-count{font-size:9px;color:var(--textd);background:var(--navy);border:1px solid var(--border);border-radius:10px;padding:1px 6px}
+.col-total{font-size:9px;color:var(--gold);font-weight:600}
+.col-body{padding:8px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:7px}
+.col-body.drag-over{background:var(--goldbg);border-radius:6px}
+.card{background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:grab;transition:all .2s;position:relative}
+.card:hover{border-color:var(--gold);box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.card.dragging{opacity:.4;cursor:grabbing}
+.card-tipo{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.card-nome{font-size:11px;font-weight:700;color:var(--white);margin-bottom:2px;line-height:1.3}
+.card-cidade{font-size:10px;color:var(--textd);margin-bottom:6px}
+.card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
+.card-valor{font-size:11px;font-weight:700;color:var(--gold)}
+.card-followup{font-size:9px;display:flex;align-items:center;gap:3px}
+.card-followup.urgente{color:var(--red)}.card-followup.hoje{color:var(--orange)}.card-followup.ok{color:var(--textd)}
+.card-actions{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.card-btn{padding:3px 8px;border-radius:5px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:none;color:var(--textd);font-family:'Inter',sans-serif;transition:all .15s}
+.card-btn:hover{border-color:var(--gold);color:var(--gold)}
+.hist-count{font-size:9px;color:var(--blue);margin-top:4px}
+.tipo-badge{font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px}
+.t-condo{background:var(--bluebg);color:var(--blue)}.t-escola{background:rgba(224,149,58,.15);color:var(--orange)}
+.t-clube{background:var(--purplebg);color:var(--purple)}.t-hotel{background:var(--greenbg);color:var(--green)}
+.t-outro{background:rgba(100,100,100,.2);color:#888}.t-praca{background:var(--goldbg);color:var(--gold)}
+.dot-prosp{background:#5b9bd5}.dot-cont{background:#e0953a}.dot-prop{background:#9b7fd4}.dot-fech{background:#4caf82}.dot-perd{background:#e07070}
+.title-prosp{color:#5b9bd5}.title-cont{color:#e0953a}.title-prop{color:#9b7fd4}.title-fech{color:#4caf82}.title-perd{color:#e07070}
+.empty-col{text-align:center;padding:16px 8px;color:var(--textd);font-size:10px}
+.empty-col span{font-size:18px;display:block;margin-bottom:4px}
+.followup-banner{background:rgba(224,112,112,.1);border:1px solid rgba(224,112,112,.3);border-radius:8px;padding:8px 16px;margin:0 20px 0;font-size:11px;color:var(--red);display:none;align-items:center;gap:8px}
+.followup-banner.show{display:flex}
+
+/* ── FICHA CUSTO ── */
+.fc-wrap{max-width:820px;margin:0 auto;padding:20px 20px 80px}
+.fc-hero{background:var(--navy3);border:1px solid var(--border);border-radius:var(--r);padding:22px 28px;margin-bottom:16px}
+.fc-hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.fc-brand strong{font-family:'Playfair Display',serif;font-size:18px;color:var(--white);display:block}
+.fc-brand span{font-size:10px;color:var(--textd);letter-spacing:.06em}
+.fc-eng{text-align:right;font-size:10px;color:var(--textd);line-height:1.7}
+.fc-eng strong{color:var(--white);display:block;font-size:12px}
+.fc-title{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--textd)}
+.sec{background:var(--navy3);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:14px}
+.sec-head{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.sec-head::before{content:'';width:3px;height:12px;background:var(--gold);border-radius:2px;display:inline-block;flex-shrink:0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:580px){.g2,.g3{grid-template-columns:1fr}}
+.fr{margin-bottom:12px}
+label.lbl{font-size:10px;font-weight:600;color:var(--textd);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px}
+input[type=text],input[type=number],input[type=email],input[type=date],select,textarea{
+  width:100%;background:var(--navy);border:1px solid var(--border);border-radius:6px;
+  padding:8px 11px;font-family:'Inter',sans-serif;font-size:12px;color:var(--white);outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+select option{background:var(--navy2)}
+textarea{resize:vertical;min-height:56px}
+.pfjp{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.pfjp-btn{flex:1;padding:8px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;background:none;border:none;color:var(--textd);font-family:'Inter',sans-serif;transition:all .2s}
+.pfjp-btn.active{background:var(--gold);color:var(--navy);font-weight:700}
+.param-row{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.param-row:last-child{border-bottom:none}
+.param-name{flex:1;font-size:11px;color:var(--text)}
+.param-ctrl{display:flex;align-items:center;gap:5px}
+.spin{width:26px;height:26px;border-radius:5px;border:1px solid var(--border);background:var(--navy);color:var(--text);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;transition:all .15s}
+.spin:hover{border-color:var(--gold);color:var(--gold)}
+.spin-val{width:66px;text-align:center;background:var(--navy);border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:12px;color:var(--white);font-family:'Inter',sans-serif}
+.spin-unit{font-size:10px;color:var(--textd);min-width:26px}
+.param-select select{min-width:170px}
+.comp-table{width:100%;border-collapse:collapse}
+.comp-table th{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--textd);padding:7px 10px;background:var(--navy);border-bottom:1px solid var(--border);text-align:left}
+.comp-table th.r{text-align:right}
+.comp-table td{padding:10px 10px;font-size:11px;border-bottom:1px solid var(--border)}
+.comp-table tr:last-child td{border-bottom:none}
+.comp-detail{font-size:9px;color:var(--gold);margin-top:2px}
+.comp-val{text-align:right;font-weight:600;color:var(--white)}
+.res-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+@media(max-width:580px){.res-cards{grid-template-columns:1fr}}
+.res-card{background:var(--navy);border:1px solid var(--border);border-radius:8px;padding:14px}
+.res-card .rc-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--textd);margin-bottom:5px}
+.res-card .rc-val{font-size:16px;font-weight:700;color:var(--white)}
+.preco-box{background:var(--navy);border:1px solid var(--border);border-radius:9px;padding:18px 20px;margin-bottom:12px}
+.preco-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--textd);margin-bottom:6px}
+.preco-val{font-size:32px;font-weight:700;color:var(--white);font-family:'Playfair Display',serif}
+.preco-sub{font-size:10px;color:var(--textd);margin-top:3px}
+.res-bd{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+@media(max-width:580px){.res-bd{grid-template-columns:1fr}}
+.rbd{background:var(--navy2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-size:11px}
+.rbd .rbd-label{color:var(--textd);font-size:9px;margin-bottom:2px}.rbd .rbd-val{font-weight:700}
+.rbd.green .rbd-val{color:var(--green)}.rbd.red .rbd-val{color:var(--red)}
+.fiscal-step{background:var(--navy);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.fs-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.fs-badge{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--textd);background:var(--navy2);border:1px solid var(--border);border-radius:4px;padding:2px 7px}
+.fs-title{font-size:12px;font-weight:700;color:var(--white);margin:3px 0 2px}
+.fs-pct{font-size:9px;color:var(--textd)}.fs-val{font-size:14px;font-weight:700;color:var(--red)}
+.fs-row{display:grid;grid-template-columns:80px 1fr;gap:3px 10px;margin-top:8px;font-size:10px}
+.fs-key{color:var(--textd);font-weight:600;text-transform:uppercase;font-size:9px;padding:2px 0}
+.fs-v{color:var(--text);padding:2px 0;border-bottom:1px solid var(--border)}
+.liquido-box{background:var(--greenbg);border:1px solid #2a6b4a;border-radius:9px;padding:16px 20px}
+.liq-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:5px}
+.liq-val{font-size:26px;font-weight:700;color:var(--white);font-family:'Playfair Display',serif}
+.liq-detail{font-size:9px;color:var(--green);margin-top:4px;line-height:1.7}
+.wf-step{background:var(--navy);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start}
+.wf-icon{width:32px;height:32px;background:var(--navy2);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.wf-badge{font-size:9px;color:var(--textd);font-weight:700;text-transform:uppercase;margin-bottom:2px}
+.wf-title{font-size:12px;font-weight:700;color:var(--white);margin-bottom:3px}
+.wf-desc{font-size:10px;color:var(--text);line-height:1.6}
+.wf-link{font-size:10px;color:var(--gold);margin-top:3px;display:block;text-decoration:none}
+.alert-fc{border-radius:7px;padding:9px 13px;font-size:11px;line-height:1.6;margin-top:10px}
+.alert-pf{background:rgba(201,168,76,.08);border:1px solid var(--golddim);color:var(--gold)}
+.alert-pj{background:var(--greenbg);border:1px solid #2a6b4a;color:var(--green)}
+.orc-box{background:var(--navy);border:1px solid var(--border);border-radius:7px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.orc-num{font-size:20px;font-weight:700;color:var(--white);font-family:monospace;letter-spacing:.08em}
+.btn-copy{padding:7px 14px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--textd);font-size:10px;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:4px;transition:all .2s}
+.btn-copy:hover{border-color:var(--gold);color:var(--gold)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;padding:22px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-size:14px;font-weight:700;color:var(--white)}
+.modal-close{background:none;border:none;color:var(--textd);font-size:20px;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--red)}
+.modal-sec{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:14px 0 7px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.tipo-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px}
+.tipo-chip{padding:4px 10px;border-radius:20px;border:1px solid var(--border);font-size:10px;cursor:pointer;background:var(--navy);color:var(--textd);transition:all .15s;user-select:none}
+.tipo-chip.active{border-color:var(--gold);color:var(--gold);background:var(--goldbg)}
+.hist-list{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
+.hist-item{background:var(--navy);border:1px solid var(--border);border-radius:6px;padding:8px 10px;display:flex;gap:8px;align-items:flex-start}
+.hist-icon{font-size:13px;flex-shrink:0;margin-top:1px}
+.hist-body{flex:1}
+.hist-meta{font-size:9px;color:var(--textd);margin-bottom:2px;display:flex;gap:6px}
+.hist-meta strong{color:var(--gold)}
+.hist-text{font-size:10px;color:var(--text);line-height:1.5}
+.hist-del{background:none;border:none;color:var(--textd);cursor:pointer;font-size:12px;padding:0;line-height:1;margin-left:auto;flex-shrink:0}
+.hist-del:hover{color:var(--red)}
+.add-hist{background:var(--navy);border:1px solid var(--border);border-radius:7px;padding:10px}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--navy3);border:1px solid var(--gold);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--white);z-index:1000;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* PDF */
+#sec-orcpdf{display:none}
+.pdf-page{background:#fff;color:#1a1a1a;border-radius:12px;padding:40px;font-family:'Inter',Arial,sans-serif;box-shadow:0 8px 40px rgba(0,0,0,.5);position:relative;margin-top:18px}
+.pdf-page::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#0c1824,#c9a84c);border-radius:12px 12px 0 0}
+.pdf-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-top:6px}
+.pdf-brand strong{font-family:'Playfair Display',serif;font-size:18px;color:#0c1824;display:block}
+.pdf-brand span{font-size:9px;color:#c9a84c;text-transform:uppercase;letter-spacing:.1em}
+.pdf-brand small{font-size:9px;color:#888;display:block;margin-top:1px}
+.pdf-meta{text-align:right}
+.dm-type{font-size:9px;color:#8aa0b5;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;font-weight:600}
+.dm-ref{font-size:17px;font-weight:700;color:#0c1824;font-family:monospace}
+.dm-date{font-size:9px;color:#999;margin-top:2px}
+.pdf-divider{border:none;border-top:1px solid #e8e0d0;margin:6px 0}
+.pdf-sec{font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#c9a84c;margin:8px 0 5px}
+.pdf-cgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.pdf-field label{font-size:8px;color:#999;display:block;margin-bottom:1px;text-transform:uppercase;letter-spacing:.05em}
+.pdf-field span{font-size:11px;color:#222;font-weight:500}
+.pdf-footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px;padding-top:8px;border-top:1px solid #e8e0d0}
+.pdf-sign .sign-line{width:150px;border-bottom:1px solid #555;margin:0 auto 3px;height:18px}
+.pdf-sign{text-align:center}
+.pdf-sign p{font-size:8px;color:#555}
+.pdf-sign strong{font-size:9px;color:#0c1824;display:block}
+.pdf-crea{font-size:8px;color:#999;text-align:right;line-height:1.6}
+@media print{
+  body{background:#fff}
+  .topnav,.tab-bar,.stats-bar,.filters,.followup-banner,.kanban,.fc-wrap,.setup-banner,#sec-orcpdf>.btn-row{display:none!important}
+  #sec-orcpdf{display:block!important}
+  .pdf-page{box-shadow:none;padding:0;border-radius:0}
+  .pdf-page::before{display:none}
+  @page{size:A4;margin:10mm 14mm 10mm 14mm}
+}
+
+/* SYNC STATUS */
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--textd);display:inline-block;margin-right:4px}
+.sync-dot.ok{background:var(--green)}.sync-dot.err{background:var(--red)}.sync-dot.loading{background:var(--orange);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-logo">DACANAL ENGENHARIA</div>
+  <div class="nav-right">
+    <span id="sync-status" style="font-size:10px;color:var(--textd);display:flex;align-items:center"><span class="sync-dot" id="sync-dot"></span><span id="sync-txt">local</span></span>
+    <div class="badge">CREA-SP 5071835051</div>
+    <div class="badge" id="nav-ref">ORC-2026-001</div>
+  </div>
+</nav>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('crm',this)">📋 CRM / Leads</button>
+  <button class="tab-btn" onclick="showTab('ficha',this)">💰 Ficha de Custo</button>
+  <button class="tab-btn" onclick="showTab('config',this)">⚙️ Configuração</button>
+</div>
+
+<!-- ═══════════════ TAB CRM ═══════════════ -->
+<div id="tab-crm" class="tab-panel active">
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-val" id="st-total">0</div><div class="stat-label">Total Leads</div></div>
+    <div class="stat"><div class="stat-val gold" id="st-valor">R$ 0</div><div class="stat-label">Em negociação</div></div>
+    <div class="stat"><div class="stat-val green" id="st-fechado">R$ 0</div><div class="stat-label">Fechado</div></div>
+    <div class="stat"><div class="stat-val" id="st-tx">0%</div><div class="stat-label">Taxa fechamento</div></div>
+    <div class="stat"><div class="stat-val" id="st-followup">0</div><div class="stat-label">Follow-ups</div></div>
+  </div>
+  <div class="filters">
+    <input class="search-input" type="text" placeholder="🔍 Buscar..." id="search-input" oninput="renderKanban()">
+    <div class="filter-chip active" data-tipo="todos" onclick="setFiltro(this)">Todos</div>
+    <div class="filter-chip" data-tipo="Condomínio" onclick="setFiltro(this)">🏢 Condo</div>
+    <div class="filter-chip" data-tipo="Escola" onclick="setFiltro(this)">🏫 Escola</div>
+    <div class="filter-chip" data-tipo="Clube" onclick="setFiltro(this)">🏊 Clube</div>
+    <div class="filter-chip" data-tipo="Hotel" onclick="setFiltro(this)">🏨 Hotel</div>
+    <div class="filter-chip" data-tipo="Praça/Público" onclick="setFiltro(this)">🌳 Praça</div>
+    <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="exportarCSV()">⬇ CSV</button>
+    <button class="btn btn-gold btn-sm" onclick="abrirModalNovo()">＋ Lead</button>
+  </div>
+  <div class="followup-banner" id="followup-banner">🔔 <span id="followup-banner-txt"></span></div>
+  <div class="kanban" id="kanban"></div>
+</div>
+
+<!-- ═══════════════ TAB FICHA ═══════════════ -->
+<div id="tab-ficha" class="tab-panel">
+<div class="fc-wrap">
+  <div class="fc-hero">
+    <div class="fc-hero-top">
+      <div class="fc-brand"><strong>DACANAL ENGENHARIA</strong><span>Soluções Técnicas · Gestão de Ativos</span></div>
+      <div class="fc-eng"><strong>Flávio Dacanal</strong>Engenheiro Mecânico<br>CREA-SP: 5071835051</div>
+    </div>
+    <div class="fc-title">Ficha de Custo · Laudo Técnico Playground</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-head">Identificação do Serviço</div>
+    <label class="lbl" style="margin-bottom:6px">🔖 Número do Orçamento</label>
+    <div class="orc-box"><div class="orc-num" id="orc-display">ORC-2026-001</div><button class="btn-copy" onclick="copyOrc()">📋 Copiar</button></div>
+    <div style="font-size:9px;color:var(--textd);margin-bottom:12px">Chave de rastreio para contrato, laudo, recibo e ART.</div>
+    <div class="g2" style="margin-bottom:12px">
+      <div class="fr"><label class="lbl">Ano</label><input type="number" id="p-ano" value="2026" min="2024" onchange="updateOrc()"></div>
+      <div class="fr"><label class="lbl">Sequencial</label><input type="number" id="p-seq" value="1" min="1" onchange="updateOrc()"></div>
+    </div>
+    <div class="fr"><label class="lbl">📅 Data</label><input type="date" id="p-data"></div>
+    <div class="fr"><label class="lbl">Tipo do Cliente</label>
+      <div class="pfjp" id="pfjp">
+        <button class="pfjp-btn active" id="btn-pf" onclick="setPFPJ('PF')">👤 PF</button>
+        <button class="pfjp-btn" id="btn-pj" onclick="setPFPJ('PJ')">🏢 PJ</button>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="fr"><label class="lbl">Nome / Condomínio</label><input type="text" id="p-nome" placeholder="Ex.: Condomínio Solar das Flores"></div>
+      <div class="fr"><label class="lbl" id="doc-label">CPF</label><input type="text" id="p-doc" placeholder="000.000.000-00"></div>
+    </div>
+    <div class="fr"><label class="lbl">📍 Endereço / Local</label><input type="text" id="p-end" placeholder="Rua, nº, bairro — Ribeirão Preto/SP"></div>
+    <div class="fr"><label class="lbl">👤 Responsável</label><input type="text" id="p-resp" placeholder="Síndico, gestor..."></div>
+    <div id="alert-pfpj" class="alert-fc alert-pf">⚠️ <strong>Cliente PF</strong> — Emita recibo simples. Você recolhe INSS, ISS e IRPF por conta própria.</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-head">1 — Parâmetros de Entrada</div>
+    <div class="param-row"><div class="param-name">Hora técnica</div><div class="param-ctrl"><div class="spin" onclick="spin('hora',-10)">−</div><input class="spin-val" type="number" id="hora" value="250" onchange="calcFicha()"><span class="spin-unit">R$/h</span><div class="spin" onclick="spin('hora',10)">+</div></div></div>
+    <div class="param-row"><div class="param-name">Número de equipamentos</div><div class="param-ctrl"><div class="spin" onclick="spin('equip',-1)">−</div><input class="spin-val" type="number" id="equip" value="6" onchange="calcFicha()"><span class="spin-unit">un</span><div class="spin" onclick="spin('equip',1)">+</div></div></div>
+    <div class="param-row"><div class="param-name">Complexidade do laudo</div><div class="param-ctrl param-select"><select id="complex" onchange="calcFicha()"><option value="1">1 – Simples (1,5h)</option><option value="2" selected>2 – Médio (2,5h)</option><option value="3">3 – Complexo (4h)</option></select></div></div>
+    <div class="param-row"><div class="param-name">ART – CREA-SP</div><div class="param-ctrl"><div class="spin" onclick="spin('art',-10)">−</div><input class="spin-val" type="number" id="art" value="130" onchange="calcFicha()"><span class="spin-unit">R$</span><div class="spin" onclick="spin('art',10)">+</div></div></div>
+    <div class="param-row"><div class="param-name">Overhead home office</div><div class="param-ctrl"><div class="spin" onclick="spin('overhead',-5)">−</div><input class="spin-val" type="number" id="overhead" value="80" onchange="calcFicha()"><span class="spin-unit">R$</span><div class="spin" onclick="spin('overhead',5)">+</div></div></div>
+    <div class="param-row"><div class="param-name">Distância até o local (km)</div><div class="param-ctrl"><div class="spin" onclick="spin('dist',-2)">−</div><input class="spin-val" type="number" id="dist" value="18" onchange="calcFicha()"><span class="spin-unit">km</span><div class="spin" onclick="spin('dist',2)">+</div></div></div>
+    <div class="param-row"><div class="param-name">Eficiência do veículo</div><div class="param-ctrl"><div class="spin" onclick="spin('kml',-1)">−</div><input class="spin-val" type="number" id="kml" value="8" onchange="calcFicha()"><span class="spin-unit">km/L</span><div class="spin" onclick="spin('kml',1)">+</div></div></div>
+    <div class="param-row"><div class="param-name">Combustível</div><div class="param-ctrl"><div class="spin" onclick="spin('comb',-0.1)">−</div><input class="spin-val" type="number" id="comb" value="6.20" step="0.1" onchange="calcFicha()"><span class="spin-unit">R$/L</span><div class="spin" onclick="spin('comb',0.1)">+</div></div></div>
+    <div class="param-row"><div class="param-name">INSS %</div><div class="param-ctrl"><div class="spin" onclick="spin('inss',-1)">−</div><input class="spin-val" type="number" id="inss" value="20" onchange="calcFicha()"><span class="spin-unit">%</span><div class="spin" onclick="spin('inss',1)">+</div></div></div>
+    <div class="param-row"><div class="param-name">ISS %</div><div class="param-ctrl"><div class="spin" onclick="spin('iss',-1)">−</div><input class="spin-val" type="number" id="iss" value="2" onchange="calcFicha()"><span class="spin-unit">%</span><div class="spin" onclick="spin('iss',1)">+</div></div></div>
+    <div class="param-row"><div class="param-name">Margem de honorários %</div><div class="param-ctrl"><div class="spin" onclick="spin('margem',-5)">−</div><input class="spin-val" type="number" id="margem" value="50" onchange="calcFicha()"><span class="spin-unit">%</span><div class="spin" onclick="spin('margem',5)">+</div></div></div>
+  </div>
+
+  <div class="sec"><div class="sec-head">2 — Composição de Custos</div>
+    <table class="comp-table"><thead><tr><th>Item</th><th>Detalhe</th><th class="r">Valor</th></tr></thead><tbody id="comp-body"></tbody></table>
+  </div>
+
+  <div class="sec" id="sec-res">
+    <div class="sec-head">3 — Resultado</div>
+    <div class="res-cards">
+      <div class="res-card"><div class="rc-label">Total de Horas</div><div class="rc-val" id="r-horas">—</div></div>
+      <div class="res-card"><div class="rc-label">Custo Base Real</div><div class="rc-val" id="r-custo">—</div></div>
+      <div class="res-card"><div class="rc-label">Custo c/ Impostos</div><div class="rc-val" id="r-impostos">—</div></div>
+    </div>
+    <div class="preco-box">
+      <div class="preco-label">💰 Preço a Cobrar</div>
+      <div class="preco-val" id="r-preco">R$ —</div>
+      <div class="preco-sub" id="r-preco-sub"></div>
+    </div>
+    <div class="res-bd">
+      <div class="rbd red"><div class="rbd-label">Meu custo real</div><div class="rbd-val" id="rb-custo">—</div></div>
+      <div class="rbd red"><div class="rbd-label">Repasse impostos</div><div class="rbd-val" id="rb-imp">—</div></div>
+      <div class="rbd green"><div class="rbd-label">Margem líquida</div><div class="rbd-val" id="rb-margem">—</div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-gold" onclick="gerarPDF()">📄 Gerar PDF para Cliente</button>
+      <button class="btn btn-ghost" onclick="salvarOrcamento()">💾 Salvar Orçamento</button>
+      <button class="btn btn-ghost" onclick="copiarResumo()">📋 Copiar Resumo</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-head">📌 Passo a Passo Fiscal</div>
+    <div class="fiscal-step"><div class="fs-head"><div><div class="fs-badge">Passo 1</div><div class="fs-title">INSS — Contribuinte Individual</div><div class="fs-pct" id="fs-inss-pct">20% sobre o recebido</div></div><div class="fs-val" id="fs-inss-val">R$ —</div></div><div class="fs-row"><div class="fs-key">Prazo</div><div class="fs-v">Até o dia 20 do mês seguinte</div><div class="fs-key">Como pagar</div><div class="fs-v">GPS — Código 1007 · sal.previdencia.gov.br</div></div></div>
+    <div class="fiscal-step"><div class="fs-head"><div><div class="fs-badge">Passo 2</div><div class="fs-title">ISS — Imposto Sobre Serviços</div><div class="fs-pct" id="fs-iss-pct">2% sobre o valor bruto</div></div><div class="fs-val" id="fs-iss-val">R$ —</div></div><div class="fs-row"><div class="fs-key">Prazo</div><div class="fs-v">Até dia 10 do mês seguinte</div><div class="fs-key">Como pagar</div><div class="fs-v">DAM · Portal Prefeitura Ribeirão Preto</div></div></div>
+    <div class="fiscal-step"><div class="fs-head"><div><div class="fs-badge">Passo 3</div><div class="fs-title">Carnê-Leão / IRPF</div><div class="fs-pct">≈ 15% sobre margem</div></div><div class="fs-val" id="fs-irpf-val">R$ —</div></div><div class="fs-row"><div class="fs-key">Prazo</div><div class="fs-v">Último dia útil do mês seguinte</div><div class="fs-key">Onde</div><div class="fs-v">carne-leao.receita.fazenda.gov.br</div></div></div>
+    <div class="liquido-box"><div class="liq-label">💵 Líquido Estimado no Bolso</div><div class="liq-val" id="liq-val">R$ —</div><div class="liq-detail" id="liq-detail">—</div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-head">📌 Workflow Pós-Contrato</div>
+    <div class="wf-step"><div class="wf-icon">📝</div><div><div class="wf-badge">01</div><div class="wf-title">Emitir ART</div><div class="wf-desc">"Inspeção técnica de equipamentos de playground e elaboração de laudo conforme ABNT NBR 16071."</div><a class="wf-link" href="https://creaone.crea-sp.org.br" target="_blank">🔗 creaone.crea-sp.org.br</a></div></div>
+    <div class="wf-step"><div class="wf-icon">📅</div><div><div class="wf-badge">02</div><div class="wf-title">Confirmar Agendamento</div><div class="wf-desc">Confirme data/hora com o cliente e registre no CRM.</div></div></div>
+    <div class="wf-step"><div class="wf-icon">🔍</div><div><div class="wf-badge">03</div><div class="wf-title">Executar a Inspeção</div><div class="wf-desc">Vistoria técnica conforme checklist NBR 16071. Fotografe todos os equipamentos.</div></div></div>
+    <div class="wf-step"><div class="wf-icon">📄</div><div><div class="wf-badge">04</div><div class="wf-title">Elaborar o Laudo</div><div class="wf-desc">Redija no template Dacanal Engenharia com conclusão técnica e recomendações.</div></div></div>
+    <div class="wf-step"><div class="wf-icon">📦</div><div><div class="wf-badge">05</div><div class="wf-title">Entregar e Arquivar</div><div class="wf-desc">Envie PDF assinado. Arquive: contrato, ART e laudo por ORC.</div></div></div>
+  </div>
+
+  <div id="sec-orcpdf"><div class="pdf-page" id="pdf-content"></div></div>
+</div>
+</div>
+
+<!-- ═══════════════ TAB CONFIG ═══════════════ -->
+<div id="tab-config" class="tab-panel">
+<div style="max-width:600px;margin:0 auto;padding:24px 20px">
+  <div class="sec">
+    <div class="sec-head">☁️ Conexão Supabase</div>
+    <div style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:14px">
+      Para salvar dados na nuvem e acessar de qualquer dispositivo, insira as credenciais do seu projeto Supabase abaixo.<br>
+      <span style="color:var(--gold)">Siga o roteiro abaixo para criar o projeto gratuitamente.</span>
+    </div>
+    <div class="fr"><label class="lbl">Supabase URL</label><input type="text" id="cfg-url" placeholder="https://xxxxxxxxxxxx.supabase.co" oninput="salvarConfig()"></div>
+    <div class="fr"><label class="lbl">Supabase Anon Key</label><input type="text" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." oninput="salvarConfig()"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-gold" onclick="testarConexao()">🔗 Testar Conexão</button>
+      <button class="btn btn-ghost" onclick="sincronizarAgora()">🔄 Sincronizar Agora</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportarCSV()">⬇ Backup CSV</button>
+    </div>
+    <div id="cfg-status" style="margin-top:10px;font-size:11px;color:var(--textd)"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-head">📋 Roteiro de Configuração</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+
+      <div class="wf-step"><div class="wf-icon">1️⃣</div><div>
+        <div class="wf-title">Criar conta no GitHub</div>
+        <div class="wf-desc">Acesse <strong>github.com</strong> → Sign up → Use seu e-mail profissional → confirme o e-mail.</div>
+        <a class="wf-link" href="https://github.com/signup" target="_blank">🔗 github.com/signup</a>
+      </div></div>
+
+      <div class="wf-step"><div class="wf-icon">2️⃣</div><div>
+        <div class="wf-title">Criar repositório no GitHub</div>
+        <div class="wf-desc">No GitHub: <strong>New repository</strong> → Nome: <code style="background:var(--navy);padding:1px 5px;border-radius:3px;font-size:10px">dacanal-sistema</code> → Public → Create. Depois vá em <strong>Settings → Pages → Branch: main → /root → Save</strong>.</div>
+      </div></div>
+
+      <div class="wf-step"><div class="wf-icon">3️⃣</div><div>
+        <div class="wf-title">Upload do arquivo HTML</div>
+        <div class="wf-desc">Na página do repositório: <strong>Add file → Upload files</strong> → Arraste este arquivo HTML → Renomeie para <code style="background:var(--navy);padding:1px 5px;border-radius:3px;font-size:10px">index.html</code> → Commit changes.</div>
+      </div></div>
+
+      <div class="wf-step"><div class="wf-icon">4️⃣</div><div>
+        <div class="wf-title">Criar conta no Supabase</div>
+        <div class="wf-desc">Acesse <strong>supabase.com</strong> → Start for free → Continue with GitHub → New project → Nome: <code style="background:var(--navy);padding:1px 5px;border-radius:3px;font-size:10px">dacanal</code> → Region: South America (São Paulo) → Create.</div>
+        <a class="wf-link" href="https://supabase.com" target="_blank">🔗 supabase.com</a>
+      </div></div>
+
+      <div class="wf-step"><div class="wf-icon">5️⃣</div><div>
+        <div class="wf-title">Criar a tabela de leads no Supabase</div>
+        <div class="wf-desc">No Supabase: <strong>SQL Editor → New query</strong> → Cole e execute o SQL abaixo:</div>
+        <div style="background:var(--navy);border:1px solid var(--border);border-radius:6px;padding:10px;margin-top:8px;font-family:monospace;font-size:10px;color:var(--gold);line-height:1.7;white-space:pre-wrap">create table leads (
+  id text primary key,
+  nome text not null,
+  tipo text,
+  cidade text,
+  resp text,
+  tel text,
+  email text,
+  estagio text default 'prosp',
+  valor numeric,
+  equip integer,
+  followup date,
+  origem text,
+  obs text,
+  historico jsonb default '[]',
+  criado_em timestamptz default now(),
+  atualizado_em timestamptz default now()
+);
+alter table leads enable row level security;
+create policy "public_all" on leads for all using (true) with check (true);</div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="copiarSQL()">📋 Copiar SQL</button>
+      </div></div>
+
+      <div class="wf-step"><div class="wf-icon">6️⃣</div><div>
+        <div class="wf-title">Pegar as credenciais do Supabase</div>
+        <div class="wf-desc">No Supabase: <strong>Settings → API</strong> → Copie:<br>
+        • <strong>Project URL</strong> → cole no campo "Supabase URL" acima<br>
+        • <strong>anon public key</strong> → cole no campo "Anon Key" acima<br>
+        Depois clique em <strong>Testar Conexão</strong>.</div>
+      </div></div>
+
+      <div class="wf-step"><div class="wf-icon">7️⃣</div><div>
+        <div class="wf-title">Acessar de qualquer lugar</div>
+        <div class="wf-desc">Sua URL será: <code style="background:var(--navy);padding:1px 5px;border-radius:3px;font-size:10px">seu-usuario.github.io/dacanal-sistema</code><br>
+        Salve nos favoritos do celular. Todos os leads ficam no Supabase — acesso de qualquer dispositivo.</div>
+      </div></div>
+
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-head">🗂 Dados Locais</div>
+    <div style="font-size:11px;color:var(--text);margin-bottom:12px">Enquanto o Supabase não estiver configurado, tudo fica no navegador (localStorage).</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="exportarCSV()">⬇ Exportar CSV</button>
+      <button class="btn btn-danger btn-sm" onclick="limparDados()">🗑 Limpar dados locais</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MODAL LEAD -->
+<div class="overlay" id="modal-lead">
+<div class="modal">
+  <div class="modal-head"><div class="modal-title" id="modal-lead-title">Novo Lead</div><button class="modal-close" onclick="fecharModal('modal-lead')">×</button></div>
+  <input type="hidden" id="lead-id">
+  <div class="modal-sec">Identificação</div>
+  <div class="fr"><label class="lbl">Nome / Condomínio *</label><input type="text" id="l-nome" placeholder="Ex.: Condomínio Solar das Flores"></div>
+  <div class="g2">
+    <div class="fr"><label class="lbl">Tipo *</label><select id="l-tipo"><option value="Condomínio">🏢 Condomínio</option><option value="Escola">🏫 Escola</option><option value="Clube">🏊 Clube</option><option value="Hotel">🏨 Hotel</option><option value="Praça/Público">🌳 Praça</option><option value="Outro">📌 Outro</option></select></div>
+    <div class="fr"><label class="lbl">Cidade</label><input type="text" id="l-cidade" value="Ribeirão Preto"></div>
+  </div>
+  <div class="modal-sec">Contato</div>
+  <div class="fr"><label class="lbl">Responsável / Síndico</label><input type="text" id="l-resp"></div>
+  <div class="g2">
+    <div class="fr"><label class="lbl">WhatsApp</label><input type="text" id="l-tel" placeholder="(16) 99999-0000"></div>
+    <div class="fr"><label class="lbl">E-mail</label><input type="email" id="l-email"></div>
+  </div>
+  <div class="modal-sec">Negócio</div>
+  <div class="g2">
+    <div class="fr"><label class="lbl">Estágio</label><select id="l-estagio"><option value="prosp">🔵 Prospecção</option><option value="cont">🟠 Contato feito</option><option value="prop">🟣 Proposta enviada</option><option value="fech">🟢 Fechado</option><option value="perd">🔴 Perdido</option></select></div>
+    <div class="fr"><label class="lbl">Valor (R$)</label><input type="number" id="l-valor" min="0"></div>
+  </div>
+  <div class="g2">
+    <div class="fr"><label class="lbl">Nº de equipamentos</label><input type="number" id="l-equip" min="1"></div>
+    <div class="fr"><label class="lbl">Origem</label><select id="l-origem"><option>WhatsApp</option><option>Jiu-Jitsu</option><option>Indicação</option><option>Instagram</option><option>Google</option><option>Abordagem direta</option><option>Outro</option></select></div>
+  </div>
+  <div class="modal-sec">Follow-up</div>
+  <div class="fr"><label class="lbl">Data do próximo follow-up</label><input type="date" id="l-followup"></div>
+  <div class="fr"><label class="lbl">Observações</label><textarea id="l-obs" placeholder="Notas iniciais..."></textarea></div>
+  <div id="hist-section" style="display:none">
+    <div class="modal-sec">Histórico de Contatos</div>
+    <div class="hist-list" id="hist-list"></div>
+    <div class="add-hist">
+      <div class="tipo-chips" id="hist-tipo-chips">
+        <div class="tipo-chip active" data-v="WhatsApp" onclick="selHistTipo(this)">💬 WhatsApp</div>
+        <div class="tipo-chip" data-v="Ligação" onclick="selHistTipo(this)">📞 Ligação</div>
+        <div class="tipo-chip" data-v="Visita" onclick="selHistTipo(this)">🚗 Visita</div>
+        <div class="tipo-chip" data-v="E-mail" onclick="selHistTipo(this)">📧 E-mail</div>
+        <div class="tipo-chip" data-v="Reunião" onclick="selHistTipo(this)">🤝 Reunião</div>
+      </div>
+      <textarea id="hist-texto" placeholder="Descreva o contato..." style="min-height:48px;margin-bottom:6px"></textarea>
+      <button class="btn btn-ghost btn-sm" onclick="adicionarHist()">+ Registrar</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:18px;justify-content:space-between">
+    <button class="btn btn-danger btn-sm" id="btn-excluir" onclick="excluirLead()" style="display:none">🗑 Excluir</button>
+    <div style="display:flex;gap:8px;margin-left:auto">
+      <button class="btn btn-ghost" onclick="fecharModal('modal-lead')">Cancelar</button>
+      <button class="btn btn-gold" onclick="salvarLead()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  CONFIG & SUPABASE
+// ══════════════════════════════════════════
+let SUPA_URL = '', SUPA_KEY = '';
+let supabaseOk = false;
+
+function carregarConfig() {
+  SUPA_URL = localStorage.getItem('supa_url') || '';
+  SUPA_KEY = localStorage.getItem('supa_key') || '';
+  document.getElementById('cfg-url').value = SUPA_URL;
+  document.getElementById('cfg-key').value = SUPA_KEY;
+}
+function salvarConfig() {
+  SUPA_URL = document.getElementById('cfg-url').value.trim();
+  SUPA_KEY = document.getElementById('cfg-key').value.trim();
+  localStorage.setItem('supa_url', SUPA_URL);
+  localStorage.setItem('supa_key', SUPA_KEY);
+  supabaseOk = false;
+  setSyncStatus('local');
+}
+
+async function supaFetch(path, opts={}) {
+  if (!SUPA_URL || !SUPA_KEY) throw new Error('Supabase não configurado');
+  const res = await fetch(SUPA_URL + '/rest/v1/' + path, {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json', 'Prefer': 'return=representation', ...opts.headers },
+    ...opts
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : [];
+}
+
+async function testarConexao() {
+  const el = document.getElementById('cfg-status');
+  setSyncStatus('loading');
+  el.textContent = '⏳ Testando conexão...';
+  try {
+    await supaFetch('leads?limit=1');
+    supabaseOk = true;
+    setSyncStatus('ok');
+    el.style.color = 'var(--green)';
+    el.textContent = '✅ Conexão OK! Supabase funcionando.';
+    toast('Supabase conectado ✓');
+    await sincronizarAgora();
+  } catch(e) {
+    supabaseOk = false;
+    setSyncStatus('err');
+    el.style.color = 'var(--red)';
+    el.textContent = '❌ Erro: ' + e.message;
+  }
+}
+
+async function sincronizarAgora() {
+  if (!SUPA_URL || !SUPA_KEY) { toast('Configure o Supabase primeiro'); return; }
+  setSyncStatus('loading');
+  try {
+    const remotos = await supaFetch('leads?order=criado_em.desc');
+    // Merge: remote wins for existing, local-only pushed up
+    const remoteMap = {};
+    remotos.forEach(r => remoteMap[r.id] = r);
+    // Push leads not on remote
+    const localOnly = leads.filter(l => !remoteMap[l.id]);
+    for (const l of localOnly) {
+      await supaFetch('leads', { method:'POST', body: JSON.stringify(leadToRow(l)) });
+    }
+    // Fetch all again
+    const all = await supaFetch('leads?order=criado_em.desc');
+    leads = all.map(rowToLead);
+    saveLocal();
+    renderKanban();
+    supabaseOk = true;
+    setSyncStatus('ok');
+    toast('Sincronizado com Supabase ✓');
+  } catch(e) {
+    setSyncStatus('err');
+    toast('Erro na sincronização: ' + e.message);
+  }
+}
+
+function setSyncStatus(s) {
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-txt');
+  dot.className = 'sync-dot ' + s;
+  txt.textContent = s === 'ok' ? 'nuvem ✓' : s === 'err' ? 'erro' : s === 'loading' ? 'sincronizando...' : 'local';
+}
+
+function leadToRow(l) {
+  return { id:l.id, nome:l.nome, tipo:l.tipo, cidade:l.cidade, resp:l.resp, tel:l.tel,
+    email:l.email, estagio:l.estagio, valor:l.valor||null, equip:l.equip||null,
+    followup:l.followup||null, origem:l.origem, obs:l.obs,
+    historico:JSON.stringify(l.historico||[]),
+    criado_em:l.criadoEm||new Date().toISOString(),
+    atualizado_em:new Date().toISOString() };
+}
+function rowToLead(r) {
+  return { id:r.id, nome:r.nome, tipo:r.tipo, cidade:r.cidade, resp:r.resp, tel:r.tel,
+    email:r.email, estagio:r.estagio, valor:r.valor, equip:r.equip,
+    followup:r.followup, origem:r.origem, obs:r.obs,
+    historico: typeof r.historico === 'string' ? JSON.parse(r.historico||'[]') : (r.historico||[]),
+    criadoEm:r.criado_em };
+}
+
+// ══════════════════════════════════════════
+//  STATE / STORAGE
+// ══════════════════════════════════════════
+const COLS = [
+  {id:'prosp',label:'Prospecção',dot:'dot-prosp',title:'title-prosp'},
+  {id:'cont', label:'Contato feito',dot:'dot-cont',title:'title-cont'},
+  {id:'prop', label:'Proposta enviada',dot:'dot-prop',title:'title-prop'},
+  {id:'fech', label:'Fechado',dot:'dot-fech',title:'title-fech'},
+  {id:'perd', label:'Perdido',dot:'dot-perd',title:'title-perd'},
+];
+const TIPO_CSS={'Condomínio':'t-condo','Escola':'t-escola','Clube':'t-clube','Hotel':'t-hotel','Praça/Público':'t-praca','Outro':'t-outro'};
+const TIPO_EMOJI={'Condomínio':'🏢','Escola':'🏫','Clube':'🏊','Hotel':'🏨','Praça/Público':'🌳','Outro':'📌'};
+let leads = JSON.parse(localStorage.getItem('dacanal_leads')||'[]');
+let filtroTipo='todos', dragId=null, histTipo='WhatsApp', pfpj='PF';
+
+function saveLocal() { localStorage.setItem('dacanal_leads', JSON.stringify(leads)); }
+async function save(l) {
+  saveLocal();
+  if (supabaseOk && l) {
+    try { await supaFetch('leads?id=eq.'+l.id, {method:'UPSERT', headers:{'Prefer':'resolution=merge-duplicates'}, body:JSON.stringify(leadToRow(l))}); }
+    catch(e){ console.warn('Supabase save fail:', e); }
+  }
+}
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+function fmt(v) { return 'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmtD(v) { return 'R$ '+Math.max(0,v).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+function g(id) { return parseFloat(document.getElementById(id).value)||0; }
+
+// ══════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  else document.querySelector(`[onclick="showTab('${id}',this)"]`)?.classList.add('active');
+}
+
+// ══════════════════════════════════════════
+//  KANBAN
+// ══════════════════════════════════════════
+function setFiltro(el) {
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); filtroTipo=el.dataset.tipo; renderKanban();
+}
+function leadsFiltrados() {
+  const q=(document.getElementById('search-input').value||'').toLowerCase();
+  return leads.filter(l=>{
+    const tok=filtroTipo==='todos'||l.tipo===filtroTipo;
+    const qok=!q||l.nome.toLowerCase().includes(q)||(l.cidade||'').toLowerCase().includes(q)||(l.resp||'').toLowerCase().includes(q);
+    return tok&&qok;
+  });
+}
+function renderKanban() {
+  updateStats(); checkFollowups();
+  const kb=document.getElementById('kanban');
+  const filtered=leadsFiltrados();
+  kb.innerHTML=COLS.map(col=>{
+    const cl=filtered.filter(l=>l.estagio===col.id);
+    const cv=cl.reduce((a,l)=>a+(parseFloat(l.valor)||0),0);
+    const cards=cl.length?cl.map(l=>cardHTML(l)).join(''):`<div class="empty-col"><span>📭</span>Nenhum lead</div>`;
+    return `<div class="col" ondragover="event.preventDefault();this.querySelector('.col-body').classList.add('drag-over')" ondragleave="this.querySelector('.col-body').classList.remove('drag-over')" ondrop="drop('${col.id}',event)">
+      <div class="col-head"><div class="col-title"><div class="col-dot ${col.dot}"></div><span class="${col.title}">${col.label}</span><span class="col-count">${cl.length}</span></div>${cv>0?`<div class="col-total">${fmt(cv)}</div>`:''}</div>
+      <div class="col-body" id="body-${col.id}">${cards}</div></div>`;
+  }).join('');
+}
+function cardHTML(l) {
+  const fu=followupStatus(l.followup);
+  const hist=l.historico||[];
+  return `<div class="card" id="card-${l.id}" draggable="true" ondragstart="dragStart('${l.id}',event)" ondragend="dragEnd(event)">
+    <div class="card-tipo"><span class="tipo-badge ${TIPO_CSS[l.tipo]||'t-outro'}">${TIPO_EMOJI[l.tipo]||'📌'} ${l.tipo}</span></div>
+    <div class="card-nome">${l.nome}</div>
+    <div class="card-cidade">📍 ${l.cidade||'—'}${l.resp?' · '+l.resp:''}</div>
+    ${l.tel?`<div style="font-size:9px;color:var(--textd);margin-bottom:4px">📞 ${l.tel}${l.origem?' · via '+l.origem:''}</div>`:''}
+    <div class="card-footer">${l.valor?`<div class="card-valor">${fmt(l.valor)}</div>`:'<div></div>'}<div class="card-followup ${fu.cls}">${fu.icon} ${fu.txt}</div></div>
+    ${hist.length?`<div class="hist-count">💬 ${hist.length} contato${hist.length>1?'s':''}</div>`:''}
+    <div class="card-actions">
+      <button class="card-btn" onclick="abrirModalEditar('${l.id}')">✏️ Editar</button>
+      <button class="card-btn" onclick="moverCard('${l.id}',-1)">◀</button>
+      <button class="card-btn" onclick="moverCard('${l.id}',1)">▶</button>
+      ${l.tel?`<button class="card-btn" onclick="abrirWA('${l.tel}','${l.nome.replace(/'/g,"\\'")}')">💬 WA</button>`:''}
+    </div></div>`;
+}
+function followupStatus(d) {
+  if(!d) return {cls:'ok',icon:'',txt:'Sem data'};
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const fu=new Date(d+'T12:00:00');
+  const diff=Math.round((fu-hoje)/86400000);
+  if(diff<0)  return {cls:'urgente',icon:'🔴',txt:`Atrasado ${Math.abs(diff)}d`};
+  if(diff===0)return {cls:'hoje',icon:'🟡',txt:'Hoje!'};
+  if(diff<=3) return {cls:'urgente',icon:'🟠',txt:`Em ${diff}d`};
+  return {cls:'ok',icon:'📅',txt:fu.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})};
+}
+function updateStats() {
+  const fech=leads.filter(l=>l.estagio==='fech');
+  const ativos=leads.filter(l=>l.estagio!=='perd'&&l.estagio!=='fech');
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const pend=leads.filter(l=>l.followup&&new Date(l.followup+'T12:00:00')<=hoje&&l.estagio!=='fech'&&l.estagio!=='perd');
+  const total=leads.filter(l=>l.estagio!=='perd').length;
+  const tx=total>0?Math.round(fech.length/total*100):0;
+  document.getElementById('st-total').textContent=leads.length;
+  document.getElementById('st-valor').textContent=fmt(ativos.reduce((a,l)=>a+(parseFloat(l.valor)||0),0));
+  document.getElementById('st-fechado').textContent=fmt(fech.reduce((a,l)=>a+(parseFloat(l.valor)||0),0));
+  document.getElementById('st-tx').textContent=tx+'%';
+  document.getElementById('st-followup').textContent=pend.length;
+}
+function checkFollowups() {
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const u=leads.filter(l=>l.followup&&new Date(l.followup+'T12:00:00')<=hoje&&l.estagio!=='fech'&&l.estagio!=='perd');
+  const b=document.getElementById('followup-banner');
+  if(u.length){b.classList.add('show');document.getElementById('followup-banner-txt').textContent=`${u.length} follow-up${u.length>1?'s':''} pendente${u.length>1?'s':''}: ${u.map(l=>l.nome).join(', ')}`;}
+  else b.classList.remove('show');
+}
+function dragStart(id,ev){dragId=id;ev.dataTransfer.effectAllowed='move';setTimeout(()=>document.getElementById('card-'+id)?.classList.add('dragging'),0);}
+function dragEnd(){document.querySelectorAll('.card').forEach(c=>c.classList.remove('dragging'));document.querySelectorAll('.col-body').forEach(c=>c.classList.remove('drag-over'));}
+async function drop(colId,ev){
+  ev.preventDefault();document.querySelectorAll('.col-body').forEach(c=>c.classList.remove('drag-over'));
+  if(!dragId)return;
+  const l=leads.find(x=>x.id===dragId);
+  if(l&&l.estagio!==colId){l.estagio=colId;await save(l);renderKanban();toast(`Movido para "${COLS.find(c=>c.id===colId)?.label}"`);}
+  dragId=null;
+}
+async function moverCard(id,dir){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  const idx=COLS.findIndex(c=>c.id===l.estagio);const next=COLS[idx+dir];
+  if(next){l.estagio=next.id;await save(l);renderKanban();toast(`Movido para "${next.label}"`);}
+}
+
+// MODAL
+function abrirModalNovo(){
+  document.getElementById('lead-id').value='';
+  document.getElementById('modal-lead-title').textContent='Novo Lead';
+  ['l-nome','l-resp','l-tel','l-email','l-obs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('l-tipo').value='Condomínio';
+  document.getElementById('l-cidade').value='Ribeirão Preto';
+  document.getElementById('l-estagio').value='prosp';
+  document.getElementById('l-valor').value='';document.getElementById('l-equip').value='';
+  document.getElementById('l-followup').value='';document.getElementById('l-origem').value='WhatsApp';
+  document.getElementById('hist-section').style.display='none';
+  document.getElementById('btn-excluir').style.display='none';
+  document.getElementById('modal-lead').classList.add('open');
+  setTimeout(()=>document.getElementById('l-nome').focus(),100);
+}
+function abrirModalEditar(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  document.getElementById('lead-id').value=id;
+  document.getElementById('modal-lead-title').textContent='Editar Lead';
+  document.getElementById('l-nome').value=l.nome||'';document.getElementById('l-tipo').value=l.tipo||'Condomínio';
+  document.getElementById('l-cidade').value=l.cidade||'';document.getElementById('l-resp').value=l.resp||'';
+  document.getElementById('l-tel').value=l.tel||'';document.getElementById('l-email').value=l.email||'';
+  document.getElementById('l-estagio').value=l.estagio||'prosp';document.getElementById('l-valor').value=l.valor||'';
+  document.getElementById('l-equip').value=l.equip||'';document.getElementById('l-followup').value=l.followup||'';
+  document.getElementById('l-origem').value=l.origem||'WhatsApp';document.getElementById('l-obs').value=l.obs||'';
+  document.getElementById('hist-section').style.display='block';
+  document.getElementById('btn-excluir').style.display='inline-flex';
+  document.getElementById('hist-texto').value='';
+  renderHist(l);document.getElementById('modal-lead').classList.add('open');
+}
+function fecharModal(id){document.getElementById(id).classList.remove('open');}
+async function salvarLead(){
+  const nome=document.getElementById('l-nome').value.trim();
+  if(!nome){alert('Informe o nome do lead.');return;}
+  const id=document.getElementById('lead-id').value;
+  const dados={nome,tipo:document.getElementById('l-tipo').value,cidade:document.getElementById('l-cidade').value,
+    resp:document.getElementById('l-resp').value,tel:document.getElementById('l-tel').value,
+    email:document.getElementById('l-email').value,estagio:document.getElementById('l-estagio').value,
+    valor:document.getElementById('l-valor').value,equip:document.getElementById('l-equip').value,
+    followup:document.getElementById('l-followup').value,origem:document.getElementById('l-origem').value,
+    obs:document.getElementById('l-obs').value,criadoEm:id?(leads.find(x=>x.id===id)?.criadoEm||new Date().toISOString()):new Date().toISOString()};
+  if(id){const idx=leads.findIndex(x=>x.id===id);dados.id=id;dados.historico=leads[idx].historico||[];leads[idx]=dados;toast('Lead atualizado ✓');}
+  else{dados.id=uid();dados.historico=[];leads.unshift(dados);toast('Lead adicionado ✓');}
+  await save(dados);fecharModal('modal-lead');renderKanban();
+}
+async function excluirLead(){
+  const id=document.getElementById('lead-id').value;
+  if(!id||!confirm('Excluir este lead?'))return;
+  if(supabaseOk){try{await supaFetch('leads?id=eq.'+id,{method:'DELETE'});}catch(e){console.warn(e);}}
+  leads=leads.filter(x=>x.id!==id);saveLocal();fecharModal('modal-lead');renderKanban();toast('Lead excluído');
+}
+function selHistTipo(el){document.querySelectorAll('#hist-tipo-chips .tipo-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');histTipo=el.dataset.v;}
+async function adicionarHist(){
+  const id=document.getElementById('lead-id').value;
+  const texto=document.getElementById('hist-texto').value.trim();if(!texto)return;
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  if(!l.historico)l.historico=[];
+  l.historico.unshift({id:uid(),tipo:histTipo,texto,data:new Date().toISOString()});
+  document.getElementById('hist-texto').value='';
+  await save(l);renderHist(l);renderKanban();
+}
+const HIST_ICON={WhatsApp:'💬',Ligação:'📞',Visita:'🚗','E-mail':'📧',Reunião:'🤝'};
+function renderHist(l){
+  const hist=l.historico||[];const el=document.getElementById('hist-list');
+  if(!hist.length){el.innerHTML='<div style="font-size:10px;color:var(--textd);text-align:center;padding:8px">Nenhum contato registrado.</div>';return;}
+  el.innerHTML=hist.map(h=>`<div class="hist-item"><div class="hist-icon">${HIST_ICON[h.tipo]||'📌'}</div><div class="hist-body"><div class="hist-meta"><strong>${h.tipo}</strong><span>${new Date(h.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span></div><div class="hist-text">${h.texto}</div></div><button class="hist-del" onclick="delHist('${l.id}','${h.id}')">×</button></div>`).join('');
+}
+async function delHist(leadId,histId){
+  const l=leads.find(x=>x.id===leadId);if(!l)return;
+  l.historico=l.historico.filter(h=>h.id!==histId);
+  await save(l);renderHist(l);renderKanban();
+}
+function abrirWA(tel,nome){
+  const n=tel.replace(/\D/g,'');
+  const msg=encodeURIComponent(`Olá ${nome.split(' ')[0]}! Sou o Flávio Dacanal, Engenheiro Mecânico. Entro em contato para apresentar nosso serviço de laudo técnico de playground conforme NBR 16071. Posso enviar uma proposta?`);
+  window.open(`https://wa.me/55${n}?text=${msg}`,'_blank');
+}
+
+// ══════════════════════════════════════════
+//  FICHA DE CUSTO
+// ══════════════════════════════════════════
+function updateOrc(){
+  const ano=document.getElementById('p-ano').value;
+  const seq=String(document.getElementById('p-seq').value).padStart(3,'0');
+  const ref=`ORC-${ano}-${seq}`;
+  document.getElementById('orc-display').textContent=ref;
+  document.getElementById('nav-ref').textContent=ref;
+}
+function copyOrc(){navigator.clipboard.writeText(document.getElementById('orc-display').textContent);const b=document.querySelector('.btn-copy');b.textContent='✓ Copiado!';setTimeout(()=>b.innerHTML='📋 Copiar',1500);}
+function setPFPJ(v){
+  pfpj=v;
+  document.getElementById('btn-pf').classList.toggle('active',v==='PF');
+  document.getElementById('btn-pj').classList.toggle('active',v==='PJ');
+  document.getElementById('doc-label').textContent=v==='PF'?'CPF':'CNPJ';
+  document.getElementById('p-doc').placeholder=v==='PF'?'000.000.000-00':'00.000.000/0000-00';
+  const al=document.getElementById('alert-pfpj');
+  if(v==='PF'){al.className='alert-fc alert-pf';al.innerHTML='⚠️ <strong>Cliente PF</strong> — Emita recibo simples. Você recolhe INSS, ISS e IRPF por conta própria.';}
+  else{al.className='alert-fc alert-pj';al.innerHTML='🏢 <strong>Cliente PJ</strong> — O cliente emite RPA e retém INSS + ISS + IRRF na fonte.';}
+  calcFicha();
+}
+function spin(id,delta){const el=document.getElementById(id);el.value=Math.max(0,parseFloat((parseFloat(el.value)||0)+delta).toFixed(2));calcFicha();}
+function calcFicha(){
+  const hora=g('hora'),equip=g('equip'),cx=parseInt(document.getElementById('complex').value);
+  const art=g('art'),overhead=g('overhead'),dist=g('dist'),kml=g('kml'),comb=g('comb');
+  const inss=g('inss'),iss=g('iss'),margem=g('margem');
+  const hVist=0.5+0.4*equip,hElab={1:1.5,2:2.5,3:4}[cx]||2.5,hTotal=hVist+hElab;
+  const cVist=hVist*hora,cElab=hElab*hora,cDesl=(dist/Math.max(kml,1))*comb;
+  const custoBase=cVist+cElab+cDesl+art+overhead;
+  const aliq=(inss+iss)/100;
+  const custoImp=custoBase/(1-aliq);
+  const preco=custoImp*(1+margem/100);
+  const inssVal=preco*inss/100,issVal=preco*iss/100;
+  const baseIRPF=preco-inssVal-issVal,irpfVal=baseIRPF*0.15;
+  const liquido=preco-inssVal-issVal-irpfVal;
+  document.getElementById('comp-body').innerHTML=`
+    <tr><td><span style="margin-right:6px">⏱</span>Vistoria técnica in loco<div class="comp-detail">${hVist.toFixed(1)}h · 0,5h fixo + 0,4h × ${equip} equip.</div></td><td style="font-size:10px;color:var(--textd)">${hVist.toFixed(1)}h × ${fmtD(hora)}/h</td><td class="comp-val">${fmtD(cVist)}</td></tr>
+    <tr><td><span style="margin-right:6px">📄</span>Elaboração do laudo<div class="comp-detail">${hElab}h conforme complexidade</div></td><td style="font-size:10px;color:var(--textd)">${hElab}h × ${fmtD(hora)}/h</td><td class="comp-val">${fmtD(cElab)}</td></tr>
+    <tr><td><span style="margin-right:6px">🚗</span>Deslocamento<div class="comp-detail">${dist}km · ${kml}km/L · R$${comb.toFixed(2)}/L</div></td><td style="font-size:10px;color:var(--textd)">Round-trip</td><td class="comp-val">${fmtD(cDesl)}</td></tr>
+    <tr><td><span style="margin-right:6px">🔏</span>ART – CREA-SP<div class="comp-detail">Taxa fixa</div></td><td></td><td class="comp-val">${fmtD(art)}</td></tr>
+    <tr><td><span style="margin-right:6px">🏠</span>Overhead home office<div class="comp-detail">Rateio fixos</div></td><td></td><td class="comp-val">${fmtD(overhead)}</td></tr>`;
+  document.getElementById('r-horas').textContent=hTotal.toFixed(1)+'h';
+  document.getElementById('r-custo').textContent=fmtD(custoBase);
+  document.getElementById('r-impostos').textContent=fmtD(custoImp);
+  document.getElementById('r-preco').textContent=fmtD(preco);
+  document.getElementById('r-preco-sub').textContent=`INSS ${inss}% + ISS ${iss}% · margem ${margem}%`;
+  document.getElementById('rb-custo').textContent=fmtD(custoBase);
+  document.getElementById('rb-imp').textContent=fmtD(custoImp-custoBase);
+  document.getElementById('rb-margem').textContent=fmtD(preco-custoImp);
+  document.getElementById('fs-inss-pct').textContent=`${inss}% sobre o recebido`;
+  document.getElementById('fs-inss-val').textContent=fmtD(inssVal);
+  document.getElementById('fs-iss-pct').textContent=`${iss}% sobre o valor bruto`;
+  document.getElementById('fs-iss-val').textContent=fmtD(issVal);
+  document.getElementById('fs-irpf-val').textContent=fmtD(irpfVal);
+  document.getElementById('liq-val').textContent=fmtD(liquido);
+  document.getElementById('liq-detail').textContent=`Recebido ${fmtD(preco)} − INSS ${fmtD(inssVal)} − ISS ${fmtD(issVal)} − IRPF ${fmtD(irpfVal)}`;
+  window._d={hTotal,hVist,hElab,cVist,cElab,cDesl,art,overhead,custoBase,custoImp,preco,inssVal,issVal,irpfVal,liquido,inss,iss,margem,hora,equip,dist,kml,comb,cx};
+}
+
+function gerarPDF(){
+  const d=window._d;const ref=document.getElementById('orc-display').textContent;
+  const dataRaw=document.getElementById('p-data').value;
+  const dataFmt=dataRaw?new Date(dataRaw+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'—';
+  const cxLabel=['','Simples','Médio','Complexo'][d.cx]||'Médio';
+  const eq=d.equip;
+  document.getElementById('pdf-content').innerHTML=`
+    <div class="pdf-head"><div class="pdf-brand"><strong>DACANAL ENGENHARIA</strong><span>Laudos Técnicos · NR-12 · NBR 16071</span><small>Ribeirão Preto / SP · CREA-SP 5071835051</small></div><div class="pdf-meta"><div class="dm-type">Proposta de Serviço</div><div class="dm-ref">${ref}</div><div class="dm-date">${dataFmt}</div></div></div>
+    <hr class="pdf-divider">
+    <div class="pdf-sec">Destinatário</div>
+    <div class="pdf-cgrid"><div class="pdf-field"><label>Cliente / Condomínio</label><span>${document.getElementById('p-nome').value||'—'}</span></div><div class="pdf-field"><label>Responsável</label><span>${document.getElementById('p-resp').value||'—'}</span></div><div class="pdf-field" style="grid-column:span 2"><label>Endereço / Local</label><span>${document.getElementById('p-end').value||'—'}</span></div></div>
+    <hr class="pdf-divider">
+    <div class="pdf-sec">Objeto da Proposta</div>
+    <p style="font-size:10px;color:#333;line-height:1.55;margin-bottom:7px">Prestação de serviço de <strong>inspeção técnica de segurança de playground</strong> com elaboração de <strong>Laudo Técnico de Conformidade</strong> referente a <strong>${eq} equipamento${eq>1?'s':''}</strong>, em atendimento às normas <strong>ABNT NBR 16071</strong> (partes 1 a 7), com emissão de <strong>ART — CREA-SP</strong>.</p>
+    <p style="font-size:10px;color:#666;line-height:1.5;margin-bottom:4px">A inspeção abrange verificação de conformidade estrutural, acabamentos, ancoragem, zona de segurança, altura de queda livre, revestimento de impacto e documentação fotográfica de cada equipamento. O laudo identifica não conformidades, classifica riscos e emite recomendações priorizadas.</p>
+    <table style="width:100%;border-collapse:collapse;margin:8px 0"><thead><tr style="background:#f7f4ee"><th style="text-align:left;font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#999;padding:5px 8px;border-bottom:2px solid #e8e0d0">Escopo incluso</th><th style="text-align:center;font-size:8px;padding:5px 8px;border-bottom:2px solid #e8e0d0;width:30px"></th></tr></thead><tbody>${['Vistoria técnica in loco de todos os equipamentos do playground','Documentação fotográfica individual de cada equipamento','Laudo técnico conforme ABNT NBR 16071 (partes 1 a 7)','Identificação e classificação de não conformidades por grau de risco','Plano de ação com recomendações priorizadas','Emissão de ART — CREA-SP','Entrega em PDF com assinatura digital'].map(i=>`<tr><td style="font-size:10px;color:#333;padding:4px 8px;border-bottom:1px solid #f0ece4">${i}</td><td style="text-align:center;padding:4px 8px;border-bottom:1px solid #f0ece4;color:#c9a84c;font-size:11px">✓</td></tr>`).join('')}</tbody></table>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div style="background:#0c1824;border-radius:8px;padding:12px 16px"><div style="font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#c9a84c;margin-bottom:5px">Valor Total do Serviço</div><div style="font-size:22px;font-weight:700;color:#fff;font-family:'Playfair Display',serif">${fmtD(d.preco)}</div><div style="font-size:9px;color:#7a96b0;margin-top:3px">Inclui ART, deslocamento e laudo</div></div>
+      <div style="border:1px solid #e8e0d0;border-radius:8px;padding:12px 16px"><div style="font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#c9a84c;margin-bottom:8px">Condições Comerciais</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><div style="font-size:8px;color:#999;text-transform:uppercase">Prazo</div><div style="font-size:10px;font-weight:600;color:#222;margin-top:1px">7 dias úteis</div></div><div><div style="font-size:8px;color:#999;text-transform:uppercase">Validade</div><div style="font-size:10px;font-weight:600;color:#222;margin-top:1px">30 dias</div></div><div><div style="font-size:8px;color:#999;text-transform:uppercase">Pagamento</div><div style="font-size:10px;font-weight:600;color:#222;margin-top:1px">Pix · À vista</div></div><div><div style="font-size:8px;color:#999;text-transform:uppercase">Norma</div><div style="font-size:10px;font-weight:600;color:#222;margin-top:1px">NBR 16071</div></div></div></div>
+    </div>
+    <hr class="pdf-divider">
+    <div class="pdf-footer"><div class="pdf-sign"><div class="sign-line"></div><strong>Flávio Dacanal Junior</strong><p>Engenheiro Mecânico · CREA-SP 5071835051 · CEA ANBIMA</p></div><div class="pdf-crea">Dacanal Engenharia · Ribeirão Preto / SP<br>CREA-SP 5071835051 · CEA ANBIMA<br>Laudo conforme ABNT NBR 16071<br>${ref}</div></div>`;
+  document.getElementById('sec-orcpdf').style.display='block';
+  document.getElementById('sec-orcpdf').scrollIntoView({behavior:'smooth'});
+  setTimeout(()=>window.print(),400);
+}
+
+async function salvarOrcamento(){
+  const d=window._d;if(!d){toast('Calcule primeiro');return;}
+  const ref=document.getElementById('orc-display').textContent;
+  const nome=document.getElementById('p-nome').value;
+  if(!nome){toast('Preencha o nome do cliente');return;}
+  // Find or create lead
+  const exist=leads.find(l=>l.nome.toLowerCase()===nome.toLowerCase());
+  if(exist){
+    exist.valor=d.preco.toFixed(2);
+    exist.estagio=exist.estagio==='prosp'?'prop':exist.estagio;
+    await save(exist);toast(`Orçamento ${ref} vinculado ao lead "${nome}"`);
+  } else {
+    const nl={id:uid(),nome,tipo:'Condomínio',cidade:document.getElementById('p-end').value||'',
+      resp:document.getElementById('p-resp').value,tel:'',email:'',estagio:'prop',
+      valor:d.preco.toFixed(2),equip:d.equip,followup:'',origem:'Direto',obs:`ORC: ${ref}`,
+      historico:[{id:uid(),tipo:'E-mail',texto:`Proposta ${ref} gerada · ${fmtD(d.preco)}`,data:new Date().toISOString()}],
+      criadoEm:new Date().toISOString()};
+    leads.unshift(nl);await save(nl);
+    toast(`Lead criado e orçamento ${ref} salvo!`);
+  }
+  renderKanban();
+}
+
+function copiarResumo(){
+  const d=window._d;const ref=document.getElementById('orc-display').textContent;
+  navigator.clipboard.writeText(`*DACANAL ENGENHARIA — ${ref}*\n\nCliente: ${document.getElementById('p-nome').value||'—'}\nLocal: ${document.getElementById('p-end').value||'—'}\n\n*Composição:*\nVistoria: ${fmtD(d.cVist)}\nElaboração: ${fmtD(d.cElab)}\nDeslocamento: ${fmtD(d.cDesl)}\nART CREA-SP: ${fmtD(d.art)}\nOverhead: ${fmtD(d.overhead)}\n\nINSS ${d.inss}%: ${fmtD(d.inssVal)}\nISS ${d.iss}%: ${fmtD(d.issVal)}\n\n*💰 PREÇO A COBRAR: ${fmtD(d.preco)}*\n*💵 Líquido estimado: ${fmtD(d.liquido)}*\n\nPrazo: 7 dias úteis | Validade: 30 dias`);
+  toast('Resumo copiado ✓');
+}
+
+// CONFIG
+function copiarSQL(){
+  navigator.clipboard.writeText(`create table leads (\n  id text primary key,\n  nome text not null,\n  tipo text,\n  cidade text,\n  resp text,\n  tel text,\n  email text,\n  estagio text default 'prosp',\n  valor numeric,\n  equip integer,\n  followup date,\n  origem text,\n  obs text,\n  historico jsonb default '[]',\n  criado_em timestamptz default now(),\n  atualizado_em timestamptz default now()\n);\nalter table leads enable row level security;\ncreate policy "public_all" on leads for all using (true) with check (true);`);
+  toast('SQL copiado ✓');
+}
+function limparDados(){if(!confirm('Apagar todos os dados locais?'))return;localStorage.removeItem('dacanal_leads');leads=[];renderKanban();toast('Dados locais apagados');}
+function exportarCSV(){
+  const h=['Nome','Tipo','Cidade','Responsável','Telefone','Email','Estágio','Valor','Equipamentos','Follow-up','Origem'];
+  const m={prosp:'Prospecção',cont:'Contato feito',prop:'Proposta enviada',fech:'Fechado',perd:'Perdido'};
+  const rows=leads.map(l=>[l.nome,l.tipo,l.cidade,l.resp,l.tel,l.email,m[l.estagio]||l.estagio,l.valor,l.equip,l.followup,l.origem].map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`));
+  const csv=[h,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download=`dacanal_leads_${new Date().toISOString().split('T')[0]}.csv`;a.click();toast('CSV exportado ✓');
+}
+
+// TOAST
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// KEYS
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open'));});
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+// INIT
+carregarConfig();
+document.getElementById('p-data').value=new Date().toISOString().split('T')[0];
+
+// Demo seed
+if(!leads.length){
+  const uid2=()=>Date.now().toString(36)+Math.random().toString(36).slice(2);
+  const hoje=new Date(),am=new Date(hoje);am.setDate(am.getDate()+1);
+  leads=[
+    {id:uid2(),nome:'Condomínio Verde Parque',tipo:'Condomínio',cidade:'Ribeirão Preto',resp:'João — Síndico',tel:'16991110001',email:'sindico@vp.com',estagio:'prop',valor:'1250',equip:'8',followup:am.toISOString().split('T')[0],origem:'WhatsApp',obs:'Proposta enviada.',criadoEm:new Date().toISOString(),historico:[{id:uid2(),tipo:'WhatsApp',texto:'Primeiro contato. Interesse alto.',data:new Date().toISOString()}]},
+    {id:uid2(),nome:'Escola Municipal Jardim das Rosas',tipo:'Escola',cidade:'Ribeirão Preto',resp:'Diretora Ana Paula',tel:'16992220002',email:'',estagio:'cont',valor:'980',equip:'5',followup:hoje.toISOString().split('T')[0],origem:'Indicação',obs:'Ligar hoje.',criadoEm:new Date().toISOString(),historico:[]},
+    {id:uid2(),nome:'Clube Recreativo Ipanema',tipo:'Clube',cidade:'Sertãozinho',resp:'Carlos',tel:'16993330003',email:'',estagio:'prosp',valor:'1800',equip:'12',followup:'',origem:'Abordagem direta',obs:'',criadoEm:new Date().toISOString(),historico:[]},
+    {id:uid2(),nome:'Condomínio Solar das Flores',tipo:'Condomínio',cidade:'Ribeirão Preto',resp:'Marcia — Síndica',tel:'16994440004',email:'',estagio:'fech',valor:'1100',equip:'7',followup:'',origem:'Jiu-Jitsu',obs:'Fechado!',criadoEm:new Date().toISOString(),historico:[{id:uid2(),tipo:'Reunião',texto:'Contrato assinado.',data:new Date().toISOString()}]},
+  ];
+  saveLocal();
+}
+calcFicha();
+renderKanban();
+if(SUPA_URL&&SUPA_KEY) sincronizarAgora();
+</script>
+</body>
+</html>
