@@ -1723,6 +1723,7 @@ function entrarPortal() {
 
 async function fazerLogout() {
   if (!confirm('Deseja sair do portal?')) return;
+  // Invalidate token on Supabase server
   const token = localStorage.getItem('sb_token');
   if (token && SUPA_URL && SUPA_KEY) {
     try {
@@ -1732,14 +1733,18 @@ async function fazerLogout() {
       });
     } catch(e) {}
   }
-  localStorage.removeItem('sb_token');
-  localStorage.removeItem('sb_refresh');
-  localStorage.removeItem('sb_user');
+  // Clear ALL auth keys — prevents ghost sessions
+  ['sb_token','sb_refresh','sb_user'].forEach(k => localStorage.removeItem(k));
   currentUser = null;
+  // Show login screen
   document.getElementById('auth-overlay').classList.remove('hidden');
   document.getElementById('nav-right-area').style.display = 'none';
-  document.getElementById('auth-pass').value = '';
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-pass').value  = '';
   document.getElementById('auth-error').classList.remove('show');
+  document.getElementById('auth-error').textContent = '';
+  // Focus email field
+  setTimeout(() => document.getElementById('auth-email').focus(), 200);
 }
 
 async function verificarSessao() {
@@ -1749,9 +1754,9 @@ async function verificarSessao() {
 
   if (!token || !SUPA_URL || !SUPA_KEY) return false;
 
-  // Try to get user with existing token
+  // Try to get user with existing token — must have valid email
   const user = await supaGetUser(token);
-  if (user && user.id) {
+  if (user && user.id && user.email) {
     currentUser = user;
     return true;
   }
